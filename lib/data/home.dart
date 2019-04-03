@@ -52,7 +52,7 @@ class Result {
   String posterPath;
   String originalLanguage;
   String originalTitle;
-  List<int> genreIds;
+  List<String> genreIds;
   String backdropPath;
   bool adult;
   String overview;
@@ -85,7 +85,7 @@ class Result {
     posterPath: json["poster_path"],
     originalLanguage: json["original_language"],
     originalTitle: json["original_title"],
-    genreIds: new List<int>.from(json["genre_ids"].map((x) => x)),
+    genreIds: new List<String>.from(json["genre_ids"].map((x) => x.toString())),
     backdropPath: json["backdrop_path"],
     adult: json["adult"],
     overview: json["overview"],
