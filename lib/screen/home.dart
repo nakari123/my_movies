@@ -30,6 +30,10 @@ class MyHomeScreen extends StatefulWidget {
 class _MyHomeScreenState extends State<MyHomeScreen> {
   @override
   Widget build(BuildContext context) {
+    var size = MediaQuery.of(context).size;
+    final double itemHeight = size.height / 2;
+    final double itemWidth = size.width / 2;
+    final childRatio = itemWidth / itemHeight;
     return Scaffold(
       appBar: AppBar(
         title: Text('Home'),
@@ -38,14 +42,7 @@ class _MyHomeScreenState extends State<MyHomeScreen> {
         future: widget.data,
         builder: (context, snapshot) {
           if (snapshot.hasData) {
-            return ListView.builder(
-              itemCount: snapshot.data.length,
-              itemBuilder: (context, index) {
-                return ListTile(
-                  title: Text(snapshot.data[index].title),
-                );
-              },
-            );
+            return _gridList(snapshot.data, childRatio);
           } else if (snapshot.hasError) {
             return Text('error');
           }
@@ -53,6 +50,43 @@ class _MyHomeScreenState extends State<MyHomeScreen> {
           return CircularProgressIndicator();
         },
       ),
+    );
+  }
+
+  Widget _gridList(data, childRatio) {
+    return GridView.builder(
+      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 2,
+        childAspectRatio: childRatio,
+      ),
+      shrinkWrap: true,
+      padding: EdgeInsets.only(left: 5, right: 5, top: 20),
+      scrollDirection: Axis.vertical,
+      itemCount: data.length,
+      itemBuilder: (context, index) {
+        return _itemView(data[index]);
+      },
+    );
+  }
+
+  Widget _itemView(data) {
+    return Card(
+      child: GridTile(
+          child: Column(
+        children: <Widget>[
+          Container(
+              height: 40,
+              child: Text(data.title),
+              alignment: Alignment.center,
+              padding: EdgeInsets.all(6)),
+          Expanded(
+            child: Image.network(
+              'https://image.tmdb.org/t/p/w500' + data.posterPath,
+              fit: BoxFit.fill,
+            ),
+          ),
+        ],
+      )),
     );
   }
 }
