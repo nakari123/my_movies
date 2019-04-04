@@ -1,15 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:my_movies/API/api.dart';
 import 'package:my_movies/data/detail.dart';
+import 'package:my_movies/data/movie_images.dart';
 import 'package:percent_indicator/percent_indicator.dart';
 import 'dart:convert';
 
-Future<Welcome> fetchDetail(int id) async {
+Future<List> fetchDetail(int id) async {
   final response = await API.getDetail(id);
-  if (response.statusCode == 200) {
+  final imageRespone = await API.getImage(id);
+  if (response.statusCode == 200 && imageRespone.statusCode == 200) {
     // If the call to the server was successful, parse the JSON
     final jsonResponse = json.decode(response.body);
-    return Welcome.fromJson(jsonResponse);
+    final jsonImageResponse = json.decode(imageRespone.body);
+    return [Welcome.fromJson(jsonResponse), ImageMv.fromJson(jsonImageResponse)];
   } else {
     // If that call was not successful, throw an error.
     throw Exception('Failed to load post');
@@ -17,9 +20,10 @@ Future<Welcome> fetchDetail(int id) async {
 }
 
 class DetailScreen extends StatefulWidget {
-  final Future<Welcome> data;
+  final Future<List> data;
+  final String title;
 
-  DetailScreen({Key key, this.data}) : super(key: key);
+  DetailScreen({Key key, this.data, this.title}) : super(key: key);
 
   @override
   _DetailScreenState createState() => _DetailScreenState();
@@ -30,14 +34,14 @@ class _DetailScreenState extends State<DetailScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Title'),
+        title: Text(widget.title),
       ),
       body: Center(
         child: FutureBuilder(
           future: widget.data,
           builder: (context, snapshot) {
             if (snapshot.hasData) {
-              return _detailBody(context, snapshot.data);
+              return _detailBody(context, snapshot.data[0], snapshot.data[1]);
             } else if (snapshot.hasError) {
               return Text('error');
             }
@@ -51,51 +55,106 @@ class _DetailScreenState extends State<DetailScreen> {
   }
 }
 
-Widget _detailBody(context, data) {
+Widget _detailBody(context, data, images) {
   return SingleChildScrollView(
     scrollDirection: Axis.vertical,
     child: Column(
       children: <Widget>[
         _top(context, data),
         _overView(data),
+        _overDetail(data),
         _company(data),
+        _poster(images)
+      ],
+    ),
+  );
+}
+Widget _poster(images) {
+  return Container(); //TODO: change
+}
+Widget _itemCom(data) {
+  return Container(
+    width: 160,
+    decoration: BoxDecoration(color: Colors.white),
+    padding: EdgeInsets.all(20),
+    margin: EdgeInsets.only(right: 5),
+    alignment: Alignment.center,
+    child: Column(
+      children: <Widget>[
+        Expanded(
+            child: data.logoPath != null
+                ? Image.network(
+                    img500BaseUrl + data.logoPath,
+                    fit: BoxFit.fitWidth,
+                  )
+                : Image.asset('images/no-image-large.png',
+                    fit: BoxFit.fitWidth)),
+        Container(
+          padding: EdgeInsets.only(top: 10),
+          child: Text(
+            data.name,
+            style: TextStyle(color: Colors.black),
+          ),
+        )
       ],
     ),
   );
 }
 
 Widget _company(data) {
+  var isExist = data.productionCompanies.length > 0;
+  return isExist
+      ? Container(
+          margin: EdgeInsets.symmetric(vertical: 20.0),
+          height: 150.0,
+          child: ListView.builder(
+            scrollDirection: Axis.horizontal,
+            itemBuilder: ((context, index) {
+              return _itemCom(data.productionCompanies[index]);
+            }),
+            itemCount: data.productionCompanies.length,
+          ))
+      : Container();
+}
+
+Widget _overDetail(data) {
   return Container(
-      margin: EdgeInsets.symmetric(vertical: 20.0),
-      height: 150.0,
-      child: new ListView(
-        scrollDirection: Axis.horizontal,
-        children: <Widget>[
-          Container(
-            width: 150,
-            decoration: BoxDecoration(color: Colors.white),
-            padding: EdgeInsets.all(20),
-            margin: EdgeInsets.only(right: 5),
-            child: Column(
-              children: <Widget>[
-                Expanded(
-                    child: Image.network(
-                  'https://image.tmdb.org/t/p/w500/kP7t6RwGz2AvvTkvnI1uteEwHet.png',
-                  fit: BoxFit.fitWidth,
-                )),
-                Text(
-                  'DreamWork',
-                  style: TextStyle(color: Colors.black),
-                )
-              ],
-            ),
+    margin: EdgeInsets.only(top: 5),
+    padding: EdgeInsets.all(20),
+    decoration: BoxDecoration(color: Color.fromRGBO(36, 106, 193, 0.8)),
+    child: Column(
+      children: <Widget>[
+        Row(
+          mainAxisAlignment: MainAxisAlignment.start,
+          children: <Widget>[
+            Expanded(child: Text('Status: ' + data.status)),
+            Expanded(
+                child: Text('Run time: ' + data.runtime.toString() + ' min'))
+          ],
+        ),
+        Container(
+          padding: EdgeInsets.only(top: 5, bottom: 5),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.start,
+            children: <Widget>[
+              Expanded(
+                  child: Text('Budget : ' + data.budget.toString() + ' \$')),
+              Expanded(
+                  child: Text('Revenue : ' + data.revenue.toString() + ' \$'))
+            ],
           ),
-        ],
-      ));
+        ),
+        Container(
+            child: Text('Tagline: ' + data.tagline),
+            alignment: Alignment.centerLeft),
+      ],
+    ),
+  );
 }
 
 Widget _overView(data) {
   return Container(
+    margin: EdgeInsets.only(top: 5),
     padding: EdgeInsets.all(20),
     decoration: BoxDecoration(color: Color.fromRGBO(36, 106, 193, 0.8)),
     child: Column(
@@ -111,12 +170,12 @@ Widget _top(context, data) {
     child: Stack(
       children: <Widget>[
         Image.network(
-          img500and282BaseUrl + '/h3KN24PrOheHVYs9ypuOIdFBEpX.jpg',
+          img500and282BaseUrl + data.backdropPath,
           fit: BoxFit.fill,
         ),
         Positioned(
           child: Image.network(
-            'https://image.tmdb.org/t/p/w116_and_h174_face/xvx4Yhf0DVH8G4LzNISpMfFBDy2.jpg',
+            img166ahd174BaseUrl + data.posterPath,
             fit: BoxFit.fill,
           ),
           top: 140,
@@ -125,7 +184,7 @@ Widget _top(context, data) {
         Container(
             child: Positioned(
           width: 250,
-          child: Text('How to Train Your Dragon: The Hidden World (2019)',
+          child: Text(data.title,
               style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20)),
           right: 20,
           bottom: 130,
@@ -141,13 +200,13 @@ Widget _top(context, data) {
                   child: Row(
                 children: <Widget>[
                   CircularPercentIndicator(
-                    radius: 70.0,
+                    radius: 80.0,
                     animation: true,
                     animationDuration: 1200,
                     lineWidth: 12.0,
-                    percent: 0.4,
+                    percent: data.voteAverage / 10,
                     center: new Text(
-                      "40%",
+                      (data.voteAverage * 10).toString() + "%",
                       style: new TextStyle(
                           fontWeight: FontWeight.bold, fontSize: 16.0),
                     ),

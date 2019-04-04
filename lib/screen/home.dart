@@ -176,11 +176,14 @@ class _MyHomeScreenState extends State<MyHomeScreen> {
             width: 170,
             child: RaisedButton(
               onPressed: () {
+                Navigator.pop(context);
                 Navigator.push(
                     context,
                     MaterialPageRoute(
                         builder: (context) => DetailScreen(
-                            data: fetchDetail(data.id))));
+                              data: fetchDetail(data.id),
+                              title: data.title,
+                            )));
               },
               shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12)),
