@@ -2,13 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:my_movies/API/api.dart';
 import 'package:my_movies/data/home.dart';
 import 'package:my_movies/data/genre.dart';
+import 'package:my_movies/screen/detail.dart';
 import 'dart:convert';
 
-Future<List> fetchHome() async {
-  final response = await API.getHomeList();
+Future<List> fetchHome(page) async {
+  final response = await API.getHomeList(page);
   final response_genre = await API.getGenreList();
   var data = List<Result>();
-  var genre = List<Genre>();
   if (response.statusCode == 200 && response_genre.statusCode == 200) {
     // If the call to the server was successful, parse the JSON
     final jsonResponse = json.decode(response.body);
@@ -16,7 +16,7 @@ Future<List> fetchHome() async {
     Welcome welcome = Welcome.fromJson(jsonResponse);
     View view = View.fromJson(jsonGenreResponse);
     data = welcome.results;
-    return data;
+    return [data, view.genres];
   } else {
     // If that call was not successful, throw an error.
     throw Exception('Failed to load post');
@@ -25,8 +25,9 @@ Future<List> fetchHome() async {
 
 class MyHomeScreen extends StatefulWidget {
   final Future<List> data;
+  final int page;
 
-  MyHomeScreen({Key key, this.data}) : super(key: key);
+  MyHomeScreen({Key key, this.data, this.page}) : super(key: key);
 
   @override
   _MyHomeScreenState createState() => _MyHomeScreenState();
@@ -41,32 +42,53 @@ class _MyHomeScreenState extends State<MyHomeScreen> {
     final childRatio = itemWidth / itemHeight;
     return Scaffold(
       appBar: AppBar(
-        title: Text('Home'),
+        title: widget.page == 1
+            ? Text('Home')
+            : Text('Page ' + widget.page.toString()),
       ),
-      body: FutureBuilder(
-        future: widget.data,
-        builder: (context, snapshot) {
-          if (snapshot.hasData) {
-            return _listView(snapshot.data, childRatio);
-          } else if (snapshot.hasError) {
-            return Text('error');
-          }
-          // By default, show a loading spinner
-          return CircularProgressIndicator();
-        },
+      body: Center(
+        child: FutureBuilder(
+          future: widget.data,
+          builder: (context, snapshot) {
+            if (snapshot.hasData) {
+              return _listView(snapshot.data, childRatio);
+            } else if (snapshot.hasError) {
+              return Text('error');
+            }
+            // By default, show a loading spinner
+            return CircularProgressIndicator();
+          },
+        ),
       ),
+      floatingActionButton: FloatingActionButton(
+          onPressed: () {
+            Navigator.push(
+                context,
+                MaterialPageRoute(
+                    builder: (context) => MyHomeScreen(
+                        data: fetchHome(widget.page + 1),
+                        page: widget.page + 1)));
+          },
+          backgroundColor: Colors.greenAccent.withOpacity(0.8),
+          child: Icon(Icons.navigate_next)),
     );
   }
 
   Widget _listView(data, childRatio) {
     return ListView.builder(
         itemBuilder: (context, index) {
-          return _itemView(data[index]);
+          return _itemView(data[0][index], data[1]);
         },
-        itemCount: data.length);
+        itemCount: data[0].length);
   }
 
-  Widget _itemView(data) {
+  Widget _itemView(data, genre) {
+    List<String> genList = List();
+    for (var gen in data.genreIds) {
+      for (var g in genre) {
+        if (g.id == gen) genList.add(g.name);
+      }
+    }
     return GestureDetector(
       child: Container(
         padding: EdgeInsets.only(bottom: 5),
@@ -79,16 +101,10 @@ class _MyHomeScreenState extends State<MyHomeScreen> {
               ),
             ),
             Positioned(
-              bottom: 40,
+              bottom: 20,
               left: 10,
               child: Text(data.title,
                   style: TextStyle(fontWeight: FontWeight.w500, fontSize: 20)),
-            ),
-            Positioned(
-              bottom: 20,
-              left: 10,
-              child: Text(data.releaseDate,
-                  style: TextStyle(fontWeight: FontWeight.w500, fontSize: 15)),
             ),
           ],
         ),
@@ -107,20 +123,41 @@ class _MyHomeScreenState extends State<MyHomeScreen> {
                 ],
                 backgroundColor: Colors.greenAccent.withOpacity(0.6),
                 title: Text(data.title),
-                content: _itemDetail(data),
+                content: _itemDetail(data, genList),
               );
             });
       },
     );
   }
 
-  Widget _itemDetail(data) {
+  Widget getTextWidgets(List<String> strings) {
+    return Wrap(
+        children: strings
+            .map((item) => Container(
+                child: Text(item), padding: EdgeInsets.only(right: 5)))
+            .toList());
+  }
+
+  Widget _itemDetail(data, genList) {
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.end,
+      crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisSize: MainAxisSize.min,
       children: <Widget>[
         Container(
             child: Text(data.overview), padding: EdgeInsets.only(bottom: 10)),
+        Container(
+          padding: EdgeInsets.only(bottom: 10),
+          child: Wrap(
+            crossAxisAlignment: WrapCrossAlignment.start,
+            children: <Widget>[
+              Padding(
+                padding: const EdgeInsets.only(right: 10),
+                child: Icon(Icons.dehaze),
+              ),
+              getTextWidgets(genList)
+            ],
+          ),
+        ),
         Container(
           padding: EdgeInsets.only(bottom: 15),
           child: Row(
@@ -132,12 +169,19 @@ class _MyHomeScreenState extends State<MyHomeScreen> {
             ],
           ),
         ),
-        Container(
+        Align(
+          alignment: Alignment.centerRight,
           child: Container(
             height: 50,
             width: 170,
             child: RaisedButton(
-              onPressed: () {},
+              onPressed: () {
+                Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => DetailScreen(
+                            data: fetchDetail(data.id))));
+              },
               shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12)),
               color: Colors.black.withOpacity(0.8),
@@ -148,7 +192,7 @@ class _MyHomeScreenState extends State<MyHomeScreen> {
                     padding: const EdgeInsets.only(right: 20),
                     child: Icon(Icons.movie_creation, color: Colors.white),
                   ),
-                  Text('Watch Trailer'),
+                  Text('View More'),
                 ],
               ),
             ),

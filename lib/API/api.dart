@@ -8,12 +8,16 @@ const img500BaseUrl = 'https://image.tmdb.org/t/p/w500';
 
 
 class API {
-  static Future getHomeList() {
-    var url = baseUrl + "movie/top_rated?" + apiKey + '&language=' + language + '&page=1';
+  static Future getHomeList(page) {
+    var url = baseUrl + "movie/top_rated?" + apiKey + '&language=' + language + '&page=' + page.toString();
     return http.get(url);
   }
   static Future getGenreList() {
     var url = baseUrl + "genre/movie/list?" + apiKey + '&language=' + language;
+    return http.get(url);
+  }
+  static Future getDetail(id) {
+    var url = baseUrl + "movie/" + id.toString() + "?" + apiKey + '&language=' + language;
     return http.get(url);
   }
 }
