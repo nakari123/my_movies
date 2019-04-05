@@ -134,32 +134,37 @@ class _DialogWidgetState extends State<DialogWidget> with SingleTickerProviderSt
   AnimationController controller;
   Animation<double> opacityAnimation;
   Animation<double> scaleAnimatoin;
+  Animation<Offset> positionAnimation;
 
   @override
   void initState() {
     super.initState();
 
-    controller = AnimationController(vsync: this, duration: Duration(milliseconds: 450));
-    opacityAnimation = Tween<double>(begin: 0.0, end: 0.4).animate(CurvedAnimation(parent: controller, curve: Curves.fastOutSlowIn));
-    scaleAnimatoin = CurvedAnimation(parent: controller, curve: Curves.elasticInOut);
+    controller = AnimationController(vsync: this, duration: Duration(milliseconds: 250));
+    opacityAnimation = Tween<double>(begin: 0.0, end: 0.4).animate(CurvedAnimation(parent: controller, curve: Curves.easeInCubic));
+    positionAnimation = Tween<Offset>(begin: Offset(0,-1), end: Offset.zero).animate(CurvedAnimation(parent: controller, curve: Curves.easeIn));
 
     controller.addListener(() {
       setState(() {
       });
     });
-
     controller.forward();
   }
   @override
   Widget build(BuildContext context) {
-    return ScaleTransition(
-      scale: scaleAnimatoin,
+    return SlideTransition(
+      position: positionAnimation,
       child: AlertDialog(
         actions: <Widget>[
           IconButton(
               icon: Icon(Icons.close),
               onPressed: () {
-                Navigator.pop(context);
+                controller.addStatusListener((status){
+                  if(status == AnimationStatus.dismissed){
+                    Navigator.pop(context);
+                  }
+                });
+                controller.reverse();
               })
         ],
         backgroundColor: Colors.greenAccent.withOpacity(0.6),
@@ -207,14 +212,20 @@ class _DialogWidgetState extends State<DialogWidget> with SingleTickerProviderSt
             width: 170,
             child: RaisedButton(
               onPressed: () {
-                Navigator.pop(context);
-                Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) => DetailScreen(
+
+                controller.addStatusListener((status){
+                  if(status == AnimationStatus.dismissed){
+                    Navigator.pop(context);
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => DetailScreen(
                               data: fetchDetail(data.id),
                               title: data.title,
                             )));
+                  }
+                });
+                controller.reverse();
               },
               shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12)),
