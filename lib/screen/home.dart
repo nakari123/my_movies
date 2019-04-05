@@ -113,29 +113,60 @@ class _MyHomeScreenState extends State<MyHomeScreen> {
         showDialog(
             context: context,
             builder: (BuildContext context) {
-              return AlertDialog(
-                actions: <Widget>[
-                  IconButton(
-                      icon: Icon(Icons.close),
-                      onPressed: () {
-                        Navigator.pop(context);
-                      })
-                ],
-                backgroundColor: Colors.greenAccent.withOpacity(0.6),
-                title: Text(data.title),
-                content: _itemDetail(data, genList),
-              );
+              return DialogWidget(data: data, genList: genList);
             });
       },
     );
   }
+}
 
-  Widget getTextWidgets(List<String> strings) {
-    return Wrap(
-        children: strings
-            .map((item) => Container(
-                child: Text(item), padding: EdgeInsets.only(right: 5)))
-            .toList());
+class DialogWidget extends StatefulWidget {
+  final Result data;
+  final List<String> genList;
+
+  DialogWidget({Key key, this.data, this.genList}) : super(key: key);
+
+  @override
+  _DialogWidgetState createState() => _DialogWidgetState();
+}
+
+class _DialogWidgetState extends State<DialogWidget> with SingleTickerProviderStateMixin {
+  AnimationController controller;
+  Animation<double> opacityAnimation;
+  Animation<double> scaleAnimatoin;
+
+  @override
+  void initState() {
+    super.initState();
+
+    controller = AnimationController(vsync: this, duration: Duration(milliseconds: 450));
+    opacityAnimation = Tween<double>(begin: 0.0, end: 0.4).animate(CurvedAnimation(parent: controller, curve: Curves.fastOutSlowIn));
+    scaleAnimatoin = CurvedAnimation(parent: controller, curve: Curves.elasticInOut);
+
+    controller.addListener(() {
+      setState(() {
+      });
+    });
+
+    controller.forward();
+  }
+  @override
+  Widget build(BuildContext context) {
+    return ScaleTransition(
+      scale: scaleAnimatoin,
+      child: AlertDialog(
+        actions: <Widget>[
+          IconButton(
+              icon: Icon(Icons.close),
+              onPressed: () {
+                Navigator.pop(context);
+              })
+        ],
+        backgroundColor: Colors.greenAccent.withOpacity(0.6),
+        title: Text(widget.data.title),
+        content: _itemDetail(widget.data, widget.genList),
+      ),
+    );
   }
 
   Widget _itemDetail(data, genList) {
@@ -200,8 +231,16 @@ class _MyHomeScreenState extends State<MyHomeScreen> {
               ),
             ),
           ),
-        )
+        ),
       ],
     );
+  }
+
+  Widget getTextWidgets(List<String> strings) {
+    return Wrap(
+        children: strings
+            .map((item) => Container(
+                child: Text(item), padding: EdgeInsets.only(right: 5)))
+            .toList());
   }
 }
