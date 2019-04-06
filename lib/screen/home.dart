@@ -91,20 +91,51 @@ class _MyHomeScreenState extends State<MyHomeScreen> {
     }
     return GestureDetector(
       child: Container(
-        padding: EdgeInsets.only(bottom: 5),
+        padding: EdgeInsets.only(bottom: 15),
         child: Stack(
           children: <Widget>[
-            Container(
-              child: Image.network(
-                img500and282BaseUrl + data.backdropPath,
-                fit: BoxFit.fill,
-              ),
+            Column(
+              children: <Widget>[
+                Container(
+                  padding: EdgeInsets.only(bottom: 5),
+                  child: Image.network(
+                    img500and282BaseUrl + data.backdropPath,
+                    fit: BoxFit.fill,
+                  ),
+                ),
+                Container(
+                  width: MediaQuery.of(context).size.width,
+                  height: 60,
+                  decoration: BoxDecoration(
+                    color: Colors.greenAccent.withOpacity(0.5)
+                  ),
+                  child: Container(
+                    padding: EdgeInsets.only(right: 30),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: <Widget>[
+                        Text(data.title, style: TextStyle(fontSize: 17)),
+                        Padding(
+                          padding: const EdgeInsets.only(top: 2),
+                          child: Text(data.releaseDate, style: TextStyle(color: Colors.white30),),
+                        )
+                      ],
+                    ),
+                  ),
+                ),
+              ],
             ),
             Positioned(
-              bottom: 20,
-              left: 10,
-              child: Text(data.title,
-                  style: TextStyle(fontWeight: FontWeight.w500, fontSize: 20)),
+              bottom: 0,
+              child: Container(
+                padding: EdgeInsets.all(15),
+                child: Image.network(
+                  img166ahd174BaseUrl + data.posterPath,
+                  fit: BoxFit.fitHeight,
+                  filterQuality: FilterQuality.medium,
+                ),
+              ),
             ),
           ],
         ),
