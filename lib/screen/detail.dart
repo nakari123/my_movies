@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:my_movies/API/api.dart';
+import 'dart:convert';
 import 'package:my_movies/data/detail.dart';
 import 'package:my_movies/data/movie_images.dart';
 import 'package:percent_indicator/percent_indicator.dart';
-import 'dart:convert';
 import 'package:my_movies/utils/carousel_images.dart';
+import 'package:my_movies/screen/video.dart';
 
 Future<List> fetchDetail(int id) async {
   final response = await API.getDetail(id);
@@ -74,7 +75,7 @@ Widget _detailBody(context, data, images) {
 }
 
 Widget _backDrop(images) {
-  return CarouselImage(images: images, heightImage: 250.0, autoPlay: true);
+  return CarouselImage(images: images, heightImage: 250.0, autoPlay: false);
 }
 
 Widget _itemCom(data) {
@@ -198,7 +199,7 @@ Widget _top(context, data, images) {
                       autoPlay: false));
             },
             child: Image.network(
-              img166ahd174BaseUrl + data.posterPath,
+              img166and174BaseUrl + data.posterPath,
               fit: BoxFit.fill,
             ),
           ),
@@ -245,14 +246,25 @@ Widget _top(context, data, images) {
                 ],
               )),
               Expanded(
-                  child: Row(
-                children: <Widget>[
-                  Icon(Icons.play_arrow),
-                  Padding(
-                    padding: const EdgeInsets.only(left: 10),
-                    child: Text('Play Trailer'),
-                  )
-                ],
+                  child: GestureDetector(
+                onTap: () {
+                  Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => TrailerWidget(
+                            data: fetchVideo(data.id),
+                            title: data.title,
+                          )));
+                },
+                child: Row(
+                  children: <Widget>[
+                    Icon(Icons.play_arrow),
+                    Padding(
+                      padding: const EdgeInsets.only(left: 10),
+                      child: Text('Play Trailer'),
+                    )
+                  ],
+                ),
               ))
             ],
           ),

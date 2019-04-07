@@ -5,8 +5,8 @@ import 'package:my_movies/data/genre.dart';
 import 'package:my_movies/screen/detail.dart';
 import 'dart:convert';
 
-Future<List> fetchHome(page) async {
-  final response = await API.getHomeList(page);
+Future<List> fetchHome(page, type) async {
+  final response = await API.getHomeList(page, type);
   final response_genre = await API.getGenreList();
   var data = List<Result>();
   if (response.statusCode == 200 && response_genre.statusCode == 200) {
@@ -26,16 +26,31 @@ Future<List> fetchHome(page) async {
 class MyHomeScreen extends StatefulWidget {
   final Future<List> data;
   final int page;
+  final String type;
 
-  MyHomeScreen({Key key, this.data, this.page}) : super(key: key);
+  MyHomeScreen({Key key, this.data, this.page, this.type}) : super(key: key);
 
   @override
   _MyHomeScreenState createState() => _MyHomeScreenState();
 }
 
 class _MyHomeScreenState extends State<MyHomeScreen> {
-  @override
+  String title;
   Widget build(BuildContext context) {
+    switch(widget.type) {
+      case 'popular' : {
+        title = 'Popular';
+      }
+      break;
+      case 'upcoming' : {
+        title = 'Up Coming';
+      }
+      break;
+      case 'top_rated' : {
+        title = 'Top Rate';
+      }
+      break;
+    }
     var size = MediaQuery.of(context).size;
     final double itemHeight = size.height / 2;
     final double itemWidth = size.width / 2;
@@ -43,7 +58,7 @@ class _MyHomeScreenState extends State<MyHomeScreen> {
     return Scaffold(
       appBar: AppBar(
         title: widget.page == 1
-            ? Text('Home')
+            ? Text(title)
             : Text('Page ' + widget.page.toString()),
       ),
       body: Center(
@@ -66,7 +81,7 @@ class _MyHomeScreenState extends State<MyHomeScreen> {
                 context,
                 MaterialPageRoute(
                     builder: (context) => MyHomeScreen(
-                        data: fetchHome(widget.page + 1),
+                        data: fetchHome(widget.page + 1, widget.type),
                         page: widget.page + 1)));
           },
           backgroundColor: Colors.greenAccent.withOpacity(0.8),
@@ -131,7 +146,7 @@ class _MyHomeScreenState extends State<MyHomeScreen> {
               child: Container(
                 padding: EdgeInsets.all(15),
                 child: Image.network(
-                  img166ahd174BaseUrl + data.posterPath,
+                  img166and174BaseUrl + data.posterPath,
                   fit: BoxFit.fitHeight,
                   filterQuality: FilterQuality.medium,
                 ),

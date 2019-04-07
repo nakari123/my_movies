@@ -15,16 +15,25 @@ class CarouselImage extends StatelessWidget {
     return Container(
         height: heightImage,
         width: size.width,
-        child: Carousel(
-          images: images.map((image) {
-            return NetworkImage(img500BaseUrl + image.filePath);
-          }).toList(),
-          boxFit: BoxFit.fitWidth,
-          autoplay: autoPlay,
-          animationDuration: Duration(milliseconds: 3000),
-          dotColor: Colors.white,
-          showIndicator: false,
-          borderRadius: false,
+        child: Stack(
+          children: <Widget>[
+            Carousel(
+              images: images.map((image) {
+                return NetworkImage(img500BaseUrl + image.filePath);
+              }).toList(),
+              boxFit: BoxFit.fitWidth,
+              autoplay: autoPlay,
+              animationDuration: Duration(milliseconds: 3000),
+              dotColor: Colors.white,
+              showIndicator: false,
+              borderRadius: false,
+            ),
+            Positioned(
+              top: heightImage / 2 - 10,
+              right: 5,
+              child: Icon(Icons.arrow_forward_ios),
+            )
+          ],
         ));
   }
 }
