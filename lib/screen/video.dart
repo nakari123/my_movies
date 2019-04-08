@@ -41,11 +41,12 @@ class _TrailerWidgetState extends State<TrailerWidget> {
           builder: (context, snapshot) {
             if (snapshot.hasData) {
               if (snapshot.data.length > 0) {
-                for (var video in snapshot.data) {
-                  playlist.add(video.key);
-                  info.add(video.name);
+                if(playlist.length == 0 && info.length == 0) {
+                  for (var video in snapshot.data) {
+                    playlist.add(video.key);
+                    info.add(video.name);
+                  }
                 }
-                print(playlist);
                 return MyTrailerWidget(
                     title: 'Youtube Player Demo', playlist: playlist, info: info);
                 //return MyVideoTrailer(playlist: playlist);
