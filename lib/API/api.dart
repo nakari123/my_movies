@@ -6,7 +6,7 @@ const language = "en-US";
 const img500and282BaseUrl = 'https://image.tmdb.org/t/p/w500_and_h282_face';
 const img500BaseUrl = 'https://image.tmdb.org/t/p/w500';
 const img166and174BaseUrl = 'https://image.tmdb.org/t/p/w116_and_h174_face';
-const youtubeApiKey = "AIzaSyDTV0o-S1A9PJbMXY9sjqXSfxlnWubl2pQ";
+const youtubeApiKey = "AIzaSyASytG4YLP4mfaTsq-UXqqQXbLcqEu4_Iw";
 const youtubeUrl = "https://www.youtube.com/watch?v=";
 
 

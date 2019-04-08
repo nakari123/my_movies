@@ -28,6 +28,7 @@ class TrailerWidget extends StatefulWidget {
 
 class _TrailerWidgetState extends State<TrailerWidget> {
   final List<String> playlist = <String>[];
+  final List<String> info = <String>[];
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -42,10 +43,11 @@ class _TrailerWidgetState extends State<TrailerWidget> {
               if (snapshot.data.length > 0) {
                 for (var video in snapshot.data) {
                   playlist.add(video.key);
+                  info.add(video.name);
                 }
                 print(playlist);
                 return MyTrailerWidget(
-                    title: 'Youtube Player Demo', playlist: playlist);
+                    title: 'Youtube Player Demo', playlist: playlist, info: info);
                 //return MyVideoTrailer(playlist: playlist);
               } else {
                 return Text('Sorry, We will update trailer soon :(');

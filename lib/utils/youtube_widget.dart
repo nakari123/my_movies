@@ -3,8 +3,10 @@ import 'package:flutter/material.dart';
 
 class MyTrailerWidget extends StatefulWidget {
   final List<String> playlist;
+  final List<String> info;
 
-  MyTrailerWidget({Key key, this.title, this.playlist}) : super(key: key);
+  MyTrailerWidget({Key key, this.title, this.playlist, this.info})
+      : super(key: key);
 
   final String title;
 
@@ -25,106 +27,116 @@ class _MyTrailerWidgetState extends State<MyTrailerWidget> {
 
   @override
   Widget build(BuildContext context) {
-    return SingleChildScrollView(
+    var height = MediaQuery.of(context).size.height;
+    return Container(
+      height: height,
       child: Column(
-        mainAxisAlignment: MainAxisAlignment.start,
         children: <Widget>[
-          YoutubePlayer(
-            context: context,
-            source: widget.playlist[currentPos],
-            quality: YoutubeQuality.HD,
-            aspectRatio: 16 / 9,
-            autoPlay: false,
-            startFullScreen: false,
-            keepScreenOn: true,
-            controlsActiveBackgroundOverlay: true,
-            controlsTimeOut: Duration(seconds: 4),
-            playerMode: YoutubePlayerMode.DEFAULT,
-            callbackController: (controller) {
-              _videoController = controller;
-            },
-            showThumbnail: true,
-            onError: (error) {
-              AlertDialog(
-                content: Text('Sorry, This video does not currently exist. We will fix as soon as possible :('),
-              );
-            },
-            onVideoEnded: () {
-              if(currentPos + 1 < widget.playlist.length) {
-                setState(() {
-                  currentPos++;
-                });
-              }
-            },
-          ),
-          SizedBox(
-            height: 10.0,
-          ),
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: <Widget>[
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: <Widget>[
-                    IconButton(
-                      icon: Icon(Icons.play_arrow),
-                      onPressed: () => _videoController.value.isPlaying
-                          ? null
-                          : _videoController.play(),
-                    ),
-                    IconButton(
-                      icon: Icon(Icons.pause),
-                      onPressed: () => _videoController.pause(),
-                    ),
-                    IconButton(
-                      icon: Icon(isMute ? Icons.volume_off : Icons.volume_up),
-                      onPressed: () {
-                        _videoController.setVolume(isMute ? 1 : 0);
-                        setState(
-                              () {
-                            isMute = !isMute;
-                          },
-                        );
-                      },
-                    ),
-                  ],
-                ),
-                getListVideo(widget.playlist)
-              ],
+          Flexible(
+            flex: 3,
+            child: YoutubePlayer(
+              context: context,
+              source: widget.playlist[currentPos],
+              quality: YoutubeQuality.HD,
+              aspectRatio: 16 / 9,
+              autoPlay: false,
+              startFullScreen: false,
+              keepScreenOn: true,
+              controlsActiveBackgroundOverlay: true,
+              controlsTimeOut: Duration(seconds: 4),
+              playerMode: YoutubePlayerMode.DEFAULT,
+              callbackController: (controller) {
+                _videoController = controller;
+              },
+              showThumbnail: true,
+              onError: (error) {
+                AlertDialog(
+                  content: Text(
+                      'Sorry, This video does not currently exist. We will fix as soon as possible :('),
+                );
+              },
+              onVideoEnded: () {
+                if (currentPos + 1 < widget.playlist.length) {
+                  setState(() {
+                    currentPos++;
+                  });
+                }
+              },
             ),
-          )
+          ),
+          _controlWidget(),
+          Flexible(flex: 5,child: getListVideo(widget.playlist, widget.info, height)),
         ],
       ),
     );
   }
 
-  Widget getListVideo(playlist) {
+  Widget getListVideo(playlist, info, height) {
     return Container(
-      //color: Colors.greenAccent.withOpacity(0.6),
-        height: 300.0, // Change as per your requirement
-        width: 300.0, // Change as per your requirement
-        child: GridView.builder(
-            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 5,
-            ),
-            scrollDirection: Axis.vertical,
-            shrinkWrap: true,
+        child: ListView.builder(
             itemCount: playlist.length,
-            itemBuilder: (BuildContext context, int index) {
-              return GestureDetector(
-                  onTap: () {
-                    setState(() {
-                      currentPos = index;
-                    });
-                  },
-                  child: Card(
-                    color: currentPos == index ? Colors.greenAccent : Colors.white30,
-                    child: Center(
-                      child: Text((index + 1).toString()),
-                    ),
-                  ));
+            itemBuilder: (context, index) {
+              return GestureDetector(child: _listItem(playlist[index], info[index]), onTap: (){
+                setState(() {
+                  currentPos = index;
+                });
+              },);
             }));
+  }
+
+  Widget _listItem(key, info) {
+    return Card(
+      child: Container(
+        child: Row(
+          children: <Widget>[
+            Container(
+              padding: EdgeInsets.only(right: 10),
+                width: 180,
+                child: Image.network(
+                  'https://img.youtube.com/vi/' + key + '/0.jpg',
+                  fit: BoxFit.fitWidth,
+                )),
+            Flexible(child: Text(info), fit: FlexFit.loose),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _controlWidget() {
+    return Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: <Widget>[
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: <Widget>[
+              IconButton(
+                icon: Icon(Icons.play_arrow),
+                onPressed: () => _videoController.value.isPlaying
+                    ? null
+                    : _videoController.play(),
+              ),
+              IconButton(
+                icon: Icon(Icons.pause),
+                onPressed: () => _videoController.pause(),
+              ),
+              IconButton(
+                icon: Icon(isMute ? Icons.volume_off : Icons.volume_up),
+                onPressed: () {
+                  _videoController.setVolume(isMute ? 1 : 0);
+                  setState(
+                        () {
+                      isMute = !isMute;
+                    },
+                  );
+                },
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
   }
 }
