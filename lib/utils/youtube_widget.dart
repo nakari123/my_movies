@@ -78,8 +78,9 @@ class _MyTrailerWidgetState extends State<MyTrailerWidget> {
         child: ListView.builder(
             itemCount: playlist.length,
             itemBuilder: (context, index) {
+              var isPlay = currentPos == index;
               return GestureDetector(
-                child: _listItem(playlist[index], info[index]),
+                child: _listItem(playlist[index], info[index], isPlay),
                 onTap: () {
                   setState(() {
                     currentPos = index;
@@ -89,7 +90,7 @@ class _MyTrailerWidgetState extends State<MyTrailerWidget> {
             }));
   }
 
-  Widget _listItem(key, info) {
+  Widget _listItem(key, info, isPlay) {
     return Card(
       child: Container(
         child: Row(
@@ -101,7 +102,7 @@ class _MyTrailerWidgetState extends State<MyTrailerWidget> {
                   'https://img.youtube.com/vi/' + key + '/0.jpg',
                   fit: BoxFit.fitWidth,
                 )),
-            Flexible(child: Text(info), fit: FlexFit.loose),
+            Flexible(child: Text(info, style: TextStyle(color: isPlay ? Colors.greenAccent : Colors.white),), fit: FlexFit.loose),
           ],
         ),
       ),
