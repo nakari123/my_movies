@@ -18,6 +18,7 @@ class _MyTrailerWidgetState extends State<MyTrailerWidget> {
   int currentPos;
   VideoPlayerController _videoController;
   bool isMute = false;
+  GlobalKey _videoWidget = GlobalKey();
 
   @override
   void initState() {
@@ -32,8 +33,8 @@ class _MyTrailerWidgetState extends State<MyTrailerWidget> {
       height: height,
       child: Column(
         children: <Widget>[
-          Flexible(
-            flex: 3,
+          Container(
+            height: 250,
             child: YoutubePlayer(
               context: context,
               source: widget.playlist[currentPos],
@@ -65,22 +66,26 @@ class _MyTrailerWidgetState extends State<MyTrailerWidget> {
             ),
           ),
           _controlWidget(),
-          Flexible(flex: 5,child: getListVideo(widget.playlist, widget.info, height)),
+          getListVideo(widget.playlist, widget.info, height)
         ],
       ),
     );
   }
 
-  Widget getListVideo(playlist, info, height) {
+  Widget getListVideo(playlist, info, deviceHeight) {
     return Container(
+        height: deviceHeight - 400,
         child: ListView.builder(
             itemCount: playlist.length,
             itemBuilder: (context, index) {
-              return GestureDetector(child: _listItem(playlist[index], info[index]), onTap: (){
-                setState(() {
-                  currentPos = index;
-                });
-              },);
+              return GestureDetector(
+                child: _listItem(playlist[index], info[index]),
+                onTap: () {
+                  setState(() {
+                    currentPos = index;
+                  });
+                },
+              );
             }));
   }
 
@@ -90,7 +95,7 @@ class _MyTrailerWidgetState extends State<MyTrailerWidget> {
         child: Row(
           children: <Widget>[
             Container(
-              padding: EdgeInsets.only(right: 10),
+                padding: EdgeInsets.only(right: 10),
                 width: 180,
                 child: Image.network(
                   'https://img.youtube.com/vi/' + key + '/0.jpg',
@@ -127,7 +132,7 @@ class _MyTrailerWidgetState extends State<MyTrailerWidget> {
                 onPressed: () {
                   _videoController.setVolume(isMute ? 1 : 0);
                   setState(
-                        () {
+                    () {
                       isMute = !isMute;
                     },
                   );

@@ -131,7 +131,7 @@ class _MyHomeScreenState extends State<MyHomeScreen> {
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: <Widget>[
                         Container(
-                          width: MediaQuery.of(context).size.width / 1.5,
+                          width: MediaQuery.of(context).size.width / 1.8,
                             child: Text(data.title, style: TextStyle(fontSize: 17), textAlign: TextAlign.right,)),
                         Padding(
                           padding: const EdgeInsets.only(top: 2),
