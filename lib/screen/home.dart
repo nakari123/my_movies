@@ -120,7 +120,7 @@ class _MyHomeScreenState extends State<MyHomeScreen> {
                 ),
                 Container(
                   width: MediaQuery.of(context).size.width,
-                  height: 60,
+                  height: 70,
                   decoration: BoxDecoration(
                     color: Colors.greenAccent.withOpacity(0.5)
                   ),
@@ -130,7 +130,9 @@ class _MyHomeScreenState extends State<MyHomeScreen> {
                       crossAxisAlignment: CrossAxisAlignment.end,
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: <Widget>[
-                        Text(data.title, style: TextStyle(fontSize: 17)),
+                        Container(
+                          width: MediaQuery.of(context).size.width / 1.5,
+                            child: Text(data.title, style: TextStyle(fontSize: 17), textAlign: TextAlign.right,)),
                         Padding(
                           padding: const EdgeInsets.only(top: 2),
                           child: Text(data.releaseDate, style: TextStyle(color: Colors.white30),),
